@@ -26,11 +26,12 @@ var birdImage; // Declare a variable to store the bird image
 function preload() {
   birdImage = loadImage('./assets/bird.png');
 }
-////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////
 function setup() {
   canvas = createCanvas(1000, 600);
 
-  engine = Engine.create();  // create an engine
+  engine = Engine.create(); // create an engine
 
   setupGround();
 
@@ -42,7 +43,8 @@ function setup() {
 
   setupMouseInteraction();
 }
-////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////
 function draw() {
   background(0);
 
@@ -58,82 +60,35 @@ function draw() {
 
   drawSlingshot();
 }
-////////////////////////////////////////////////////////////
-//use arrow keys to control propeller
+
+
+////////////////////////////////////////////////////////////////
+// Use arrow keys to control propeller
 function keyPressed() {
-  if (keyCode == LEFT_ARROW) {
-    //your code here
+  if (keyCode == LEFT_ARROW && !gameEnded) {
+    angleSpeed -= 0.01; // Adjust the angle speed as needed
+  } else if (keyCode == RIGHT_ARROW && !gameEnded) {
+    angleSpeed += 0.01; // Adjust the angle speed as needed
   }
-  else if (keyCode == RIGHT_ARROW) {
-    //your code here
-  }
-}
-////////////////////////////////////////////////////////////
-function keyTyped() {
-  //if 'b' create a new bird to use with propeller
-  if (key === 'b') {
-    setupBird();
-  }
-
-  //if 'r' reset the slingshot
-  if (key === 'r') {
-    removeFromWorld(slingshotBird);
-    removeFromWorld(slingshotConstraint);
-    setupSlingshot();
-  }
+  if (gameEnded) { angleSpeed = 0 }
 }
 
-//**********************************************************************
-//  HELPER FUNCTIONS - DO NOT WRITE BELOW THIS line
-//**********************************************************************
 
-//if mouse is released destroy slingshot constraint so that
-//slingshot bird can fly off
+// If mouse is released, release the bird from the slingshot
 function mouseReleased() {
   setTimeout(() => {
-    slingshotConstraint.bodyB = null;
-    slingshotConstraint.pointA = { x: 0, y: 0 };
+    if (slingshotBird && slingshotConstraint) {
+      slingshotBird.isReleased = true;
+      slingshotConstraint.bodyB = null;
+      slingshotConstraint.pointA = { x: 0, y: 0 };
+      slingshotConstraint.stiffness = slingshotStiffness;
+    }
   }, 100);
 }
-////////////////////////////////////////////////////////////
-//tells you if a body is off-screen
-function isOffScreen(body) {
-  var pos = body.position;
-  return (pos.y > height || pos.x < 0 || pos.x > width);
-}
-////////////////////////////////////////////////////////////
-//removes a body from the physics world
+
+
+
 function removeFromWorld(body) {
   World.remove(engine.world, body);
-}
-////////////////////////////////////////////////////////////
-function drawVertices(vertices) {
-  beginShape();
-  for (var i = 0; i < vertices.length; i++) {
-    vertex(vertices[i].x, vertices[i].y);
-  }
-  endShape(CLOSE);
-}
-////////////////////////////////////////////////////////////
-function drawConstraint(constraint) {
-  push();
-  var offsetA = constraint.pointA;
-  var posA = { x: 0, y: 0 };
-  if (constraint.bodyA) {
-    posA = constraint.bodyA.position;
-  }
-  var offsetB = constraint.pointB;
-  var posB = { x: 0, y: 0 };
-  if (constraint.bodyB) {
-    posB = constraint.bodyB.position;
-  }
-  strokeWeight(5);
-  stroke(255);
-  line(
-    posA.x + offsetA.x,
-    posA.y + offsetA.y,
-    posB.x + offsetB.x,
-    posB.y + offsetB.y
-  );
-  pop();
+
 }
